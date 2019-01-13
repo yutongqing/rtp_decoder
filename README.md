@@ -1,2 +1,2 @@
 # rtp_decoder
-decode rtp from a pcap file and output a raw pcm file.
+decode rtp from a pcap file and output a wav file.
