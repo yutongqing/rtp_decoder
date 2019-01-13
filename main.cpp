@@ -2,7 +2,7 @@
  * @Author: yu.tongqing 
  * @Date: 2019-01-13 10:03:30 
  * @Last Modified by: yu.tongqing
- * @Last Modified time: 2019-01-13 16:39:16
+ * @Last Modified time: 2019-01-13 18:12:49
  */
 
 #include "pcap_reader.h"
@@ -10,17 +10,24 @@
 
 int main(int argc, const char* argv[])
 {
-    std::string filename = "abc.pcap";
-    pcap_reader pr(filename);
+    if(argc < 6)
+    {
+        printf("usage: %s pcap_file src_ip dst_ip src_port dst_port\n", argv[0]);
+        return 1;
+    }
+
     std::shared_ptr<rtp_packet> rtp;
     std::shared_ptr<rtp_packet> last_rtp;
     std::shared_ptr<codec> c;
+    std::string filename(argv[1]);
+    pcap_reader pr(filename);
     FILE* fp = fopen("out.pcm", "w");
     if(!fp)
     {
         printf("open file fail\n");
     }
-    while(rtp = pr.get_next_rtp("67.216.222.199", "172.20.10.9", 24326, 58374))
+
+    while(rtp = pr.get_next_rtp(argv[2], argv[3], atoi(argv[4]), atoi(argv[5])))
     {
         printf("get rtp packet, payload type: %u, seq: %u, timestamp: %u, data len: %lu\n",
         rtp->header.pt, rtp->header.seq, rtp->header.timestamp, rtp->data.size());
