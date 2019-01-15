@@ -16,6 +16,15 @@ typedef struct eth_header
     u_short type;
 } eth_header_t;
 
+typedef struct vlan_header
+{
+	
+	u_short id : 12;
+	u_short dei : 1;
+	u_short priority : 3;
+	u_short type;
+} vlan_header_t;
+
 typedef struct ip_address
 {
     u_char byte1;
@@ -72,6 +81,7 @@ typedef struct rtp_header
     u_int32_t csrc[];
 }rtp_header_t;
 
+#define TYPE_VLAN 129
 #define TYPE_IPV4 8
 #define TYPE_UDP 17
 

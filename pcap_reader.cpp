@@ -50,15 +50,23 @@ std::shared_ptr<rtp_packet> pcap_reader::get_next_rtp(const char* src_ip, const 
                 //eth_h->src[0], eth_h->src[1], eth_h->src[2], eth_h->src[3], eth_h->src[4], eth_h->src[5],
                 //eth_h->dst[0], eth_h->dst[1], eth_h->dst[2], eth_h->dst[3], eth_h->dst[4], eth_h->dst[5],
                 //eth_h->type);
+                
+                //process vlan
+                if(eth_h->type == TYPE_VLAN)
+                {
+                    const vlan_header_t* vlan_h = (const vlan_header_t*) p;
+                    p += sizeof(vlan_header_t);
+                    ip_type = vlan_h->type;
+                }else
+                {
+                    ip_type = eth_h->type;
+                }
 
-                ip_type = eth_h->type;
-
+                //process ipv4 header
                 if(ip_type != TYPE_IPV4)
                 {
                     continue;
                 }
-
-                //process ipv4 header
                 const ip_header_t* ip_h = (const ip_header_t*) p;
                 p += sizeof(ip_header_t);
                 char src[100];
@@ -91,7 +99,7 @@ std::shared_ptr<rtp_packet> pcap_reader::get_next_rtp(const char* src_ip, const 
                 rtp_packet_ptr->header = *rtp_h;
                 rtp_packet_ptr->header.seq = ntohs(rtp_h->seq);
                 rtp_packet_ptr->header.timestamp = ntohl(rtp_h->timestamp);
-                rtp_packet_ptr->data = std::string((const char*)p, (size_t)ntohs(udp_h->length) - sizeof(rtp_header_t));
+                rtp_packet_ptr->data = std::string((const char*)p, (size_t)ntohs(udp_h->length) - sizeof(udp_header_t) - sizeof(rtp_header_t));
 
                 m_buffer.put_packet(rtp_packet_ptr);
                 break;

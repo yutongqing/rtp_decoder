@@ -67,7 +67,7 @@ int main(int argc, const char* argv[])
         if(!c)
         {
             printf("can not get codec for payload type: %u\n", rtp->header.pt);
-            break;
+            continue;
         }
 
         std::string &&result = c->decode(std::string(""), rtp->data);

@@ -15,6 +15,7 @@
 
 #define CODEC_BIND(classname, type) codec_creator cc_##classname##_##type ((type), new classname());
 #define DEFAULT_CODEC_PT 9999
+#define CODEC_PT_NOISE 13
 
 class codec;
 extern std::unordered_map <unsigned short, std::shared_ptr<codec>> g_creator_map;
@@ -39,6 +40,10 @@ public:
         auto iter = g_creator_map.find(pt);
         if(iter == g_creator_map.end())
         {
+            if(pt == CODEC_PT_NOISE)
+            {
+                return NULL;
+            }
             auto c = g_creator_map[DEFAULT_CODEC_PT];
             c->set_payload_type(pt);
             return c;
