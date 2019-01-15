@@ -6,11 +6,15 @@
  */
 
 #include "codec.h"
+#include "g711/g711.h"
 
 std::unordered_map <unsigned short, std::shared_ptr<codec>> g_creator_map;
-CODEC_BIND(opus_codec, 102)
 CODEC_BIND(opus_codec, DEFAULT_CODEC_PT)
+CODEC_BIND(g_711_codec, CODEC_PT_PCMU)
+CODEC_BIND(g_711_codec, CODEC_PT_PCMA)
 
+
+//opus codec
 opus_codec::opus_codec()
 {
     int error;
@@ -45,4 +49,45 @@ std::string opus_codec::decode(const std::string& last_packet, const std::string
     }
     free(pcm);
     return result;
+}
+
+uint32_t opus_codec::get_sample_rate()
+{
+    return 48000;
+}
+
+//g711 codec
+g_711_codec::g_711_codec()
+{
+
+}
+
+g_711_codec::~g_711_codec()
+{
+
+}
+
+std::string g_711_codec::decode(const std::string& last_packet, const std::string& packet)
+{
+    std::string result = "";
+    short out;
+    unsigned short pt = codec::get_payload_type();
+    for (int i = 0; i < packet.size(); ++i)
+    {
+
+        if(pt == CODEC_PT_PCMA)
+        {
+            out = alaw2linear((unsigned char)packet[i]);
+        }else
+        {
+            out = ulaw2linear((unsigned char)packet[i]);
+        }
+        result.append((char*)&out, sizeof(out));
+    }
+    return result;
+}
+
+uint32_t g_711_codec::get_sample_rate()
+{
+    return 8000;
 }

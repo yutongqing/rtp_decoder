@@ -16,6 +16,8 @@
 #define CODEC_BIND(classname, type) codec_creator cc_##classname##_##type ((type), new classname());
 #define DEFAULT_CODEC_PT 9999
 #define CODEC_PT_NOISE 13
+#define CODEC_PT_PCMU 0
+#define CODEC_PT_PCMA 8
 
 class codec;
 extern std::unordered_map <unsigned short, std::shared_ptr<codec>> g_creator_map;
@@ -34,6 +36,7 @@ class codec
 public:
     virtual ~codec(){}
     virtual std::string decode(const std::string& last_packet, const std::string& packet) = 0;
+    virtual uint32_t get_sample_rate() = 0;
 
     static std::shared_ptr<codec> get_codec_by_payload_type(unsigned short pt)
     {
@@ -59,6 +62,10 @@ public:
     {
         this->pt = pt;
     }
+    unsigned short get_payload_type()
+    {
+        return this->pt;
+    }
 private:
     unsigned short pt;
 };
@@ -69,8 +76,18 @@ public:
     opus_codec();
     virtual ~opus_codec();
     std::string decode(const std::string& last_packet, const std::string& packet);
+    virtual uint32_t get_sample_rate();
 private:
     OpusDecoder* m_opus_decoder;
+};
+
+class g_711_codec : public codec
+{
+public:
+    g_711_codec();
+    virtual ~g_711_codec();
+    std::string decode(const std::string& last_packet, const std::string& packet);
+    virtual uint32_t get_sample_rate();
 };
 
 #endif

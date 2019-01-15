@@ -58,12 +58,14 @@ int main(int argc, const char* argv[])
     fwrite((void*)&wav_h, 1, sizeof(wav_h), fp);//the space for wav header
 
     u_int32_t pcm_len = 0;
+    u_int32_t sample_rate = 0;
     while(rtp = pr.get_next_rtp(argv[2], argv[3], atoi(argv[4]), atoi(argv[5])))
     {
         printf("get rtp packet, payload type: %u, seq: %u, timestamp: %u, data len: %lu\n",
         rtp->header.pt, rtp->header.seq, rtp->header.timestamp, rtp->data.size());
 
         c = codec::get_codec_by_payload_type(rtp->header.pt);
+        sample_rate = c->get_sample_rate();
         if(!c)
         {
             printf("can not get codec for payload type: %u\n", rtp->header.pt);
@@ -85,7 +87,7 @@ int main(int argc, const char* argv[])
     wav_h.fmt_chunk.sub_chunk_size = sizeof(wav_fmt_chunk_t) - 8;
     wav_h.fmt_chunk.audio_format = 1;
     wav_h.fmt_chunk.num_channels = 1;
-    wav_h.fmt_chunk.sample_rate = 48000;
+    wav_h.fmt_chunk.sample_rate = sample_rate;
     wav_h.fmt_chunk.byte_rate = wav_h.fmt_chunk.sample_rate * 2;
     wav_h.fmt_chunk.block_align = 2;
     wav_h.fmt_chunk.bits_per_sample = 16;
