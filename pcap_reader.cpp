@@ -95,11 +95,21 @@ std::shared_ptr<rtp_packet> pcap_reader::get_next_rtp(const char* src_ip, const 
                 const rtp_header_t* rtp_h = (const rtp_header_t*) p;
                 p += sizeof(rtp_header_t);
 
+                //process rtp extension
+                u_int16_t ext_len = 0;
+                if(rtp_h->x)
+                {
+                    p += 2;
+                    ext_len = ntohs(*(u_int16_t*)p);
+                    p += sizeof(ext_len) + ext_len*4;
+                    ext_len += ext_len * 4 + 2;
+                }
+
                 std::shared_ptr<rtp_packet> rtp_packet_ptr(new rtp_packet);
                 rtp_packet_ptr->header = *rtp_h;
                 rtp_packet_ptr->header.seq = ntohs(rtp_h->seq);
                 rtp_packet_ptr->header.timestamp = ntohl(rtp_h->timestamp);
-                rtp_packet_ptr->data = std::string((const char*)p, (size_t)ntohs(udp_h->length) - sizeof(udp_header_t) - sizeof(rtp_header_t));
+                rtp_packet_ptr->data = std::string((const char*)p, (size_t)ntohs(udp_h->length) - sizeof(udp_header_t) - sizeof(rtp_header_t) - ext_len);
 
                 m_buffer.put_packet(rtp_packet_ptr);
                 break;

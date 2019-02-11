@@ -22,7 +22,7 @@ typedef struct wav_fmt_chunk
 
 typedef struct wav_data_chunk
 {
-    u_int32_t sub_chunk_id[4];
+    char sub_chunk_id[4];
     u_int32_t sub_chunk_size;
 } wav_data_chunk_t;
 
@@ -55,6 +55,7 @@ int main(int argc, const char* argv[])
     }
 
     wav_header_t wav_h;
+    memset((void*)&wav_h, 0xff, sizeof(wav_h));
     fwrite((void*)&wav_h, 1, sizeof(wav_h), fp);//the space for wav header
 
     u_int32_t pcm_len = 0;
@@ -96,6 +97,7 @@ int main(int argc, const char* argv[])
 
     fseek(fp, 0, SEEK_SET);
     fwrite((void*)&wav_h, 1, sizeof(wav_h), fp);//write wav header
+    printf("wav header size: %d\n", sizeof(wav_h));
 
     fclose(fp);
     return 0;
